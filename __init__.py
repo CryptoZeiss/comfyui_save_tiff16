@@ -186,8 +186,9 @@ def build_icc(space):
 def write_tiff16(path, rgb16, icc, dpi=300):
     h, w, c = rgb16.shape
     assert c == 3 and rgb16.dtype == np.uint16
-    pixels = rgb16.astype("<u2").tobytes()
-    if len(pixels) > 3_900_000_000:
+    pixels = np.ascontiguousarray(rgb16, dtype="<u2")  # no copy on little-endian machines
+    nbytes = pixels.nbytes
+    if nbytes > 3_900_000_000:
         raise ValueError("Image too large for standard TIFF (>4GB). Reduce size or split.")
 
     software = b"ComfyUI Save TIFF 16-bit (Colour Managed)\0"
@@ -202,7 +203,7 @@ def write_tiff16(path, rgb16, icc, dpi=300):
         (273, LONG, 1, None),                           # strip offset (filled later)
         (277, SHORT, 1, struct.pack("<H", 3)),
         (278, LONG, 1, struct.pack("<I", h)),
-        (279, LONG, 1, struct.pack("<I", len(pixels))),
+        (279, LONG, 1, struct.pack("<I", nbytes)),
         (282, RATIONAL, 1, struct.pack("<II", dpi, 1)),
         (283, RATIONAL, 1, struct.pack("<II", dpi, 1)),
         (284, SHORT, 1, struct.pack("<H", 1)),         # chunky
@@ -241,7 +242,7 @@ def write_tiff16(path, rgb16, icc, dpi=300):
         f.write(b"II" + struct.pack("<HI", 42, ifd_offset))
         f.write(ifd)
         f.write(extra)
-        f.write(pixels)
+        pixels.tofile(f)
 
 
 # ---------------------------------------------------------------------------
@@ -276,9 +277,17 @@ class SaveTIFF16ColourManaged:
         tag = {"ProPhoto RGB": "ProPhoto", "Adobe RGB (1998)": "AdobeRGB", "sRGB": "sRGB"}[colour_profile]
 
         for img in images:
+            print(f"[Save TIFF 16-bit] Converting to {colour_profile} and writing TIFF "
+                  f"({img.shape[1]}x{img.shape[0]})... large prints can take a minute")
             arr = img.cpu().numpy()[..., :3]
-            conv = convert_from_srgb(arr, colour_profile)
-            rgb16 = np.round(conv * 65535.0).astype(np.uint16)
+            # Convert in strips of rows to keep memory low on very large prints (100MP+)
+            h = arr.shape[0]
+            rgb16 = np.empty(arr.shape, dtype=np.uint16)
+            step = 256
+            for y in range(0, h, step):
+                conv = convert_from_srgb(arr[y:y + step], colour_profile)
+                rgb16[y:y + step] = np.round(conv * 65535.0).astype(np.uint16)
+            del arr
             file = f"{fname}_{counter:05}_{tag}_16bit.tif"
             write_tiff16(os.path.join(full_dir, file), rgb16, icc, dpi)
             print(f"[Save TIFF 16-bit] Saved {file} ({rgb16.shape[1]}x{rgb16.shape[0]}, {colour_profile})")
