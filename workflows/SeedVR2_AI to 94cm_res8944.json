@@ -1,0 +1,406 @@
+{
+  "id": "5eb9d9a7-e600-42f4-967f-2ef2306036f2",
+  "revision": 0,
+  "last_node_id": 10,
+  "last_link_id": 13,
+  "nodes": [
+    {
+      "id": 4,
+      "type": "SeedVR2LoadDiTModel",
+      "pos": [
+        755.3332824707031,
+        1196.0000915527344
+      ],
+      "size": [
+        317.5630859375,
+        202
+      ],
+      "flags": {},
+      "order": 0,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "torch_compile_args",
+          "shape": 7,
+          "type": "TORCH_COMPILE_ARGS",
+          "link": null
+        }
+      ],
+      "outputs": [
+        {
+          "name": "SEEDVR2_DIT",
+          "type": "SEEDVR2_DIT",
+          "links": [
+            4
+          ]
+        }
+      ],
+      "properties": {
+        "cnr_id": "seedvr2_videoupscaler",
+        "ver": "2.5.24",
+        "Node name for S&R": "SeedVR2LoadDiTModel"
+      },
+      "widgets_values": [
+        "seedvr2_ema_7b_sharp_fp16.safetensors",
+        "cuda:0",
+        0,
+        false,
+        "none",
+        false,
+        "sdpa"
+      ],
+      "widgets_values_named": {
+        "model": "seedvr2_ema_7b_sharp_fp16.safetensors",
+        "device": "cuda:0",
+        "blocks_to_swap": 0,
+        "swap_io_components": false,
+        "offload_device": "none",
+        "cache_model": false,
+        "attention_mode": "sdpa"
+      }
+    },
+    {
+      "id": 5,
+      "type": "SeedVR2LoadVAEModel",
+      "pos": [
+        733.3333435058594,
+        1523.3334045410156
+      ],
+      "size": [
+        321.808203125,
+        298
+      ],
+      "flags": {},
+      "order": 1,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "torch_compile_args",
+          "shape": 7,
+          "type": "TORCH_COMPILE_ARGS",
+          "link": null
+        }
+      ],
+      "outputs": [
+        {
+          "name": "SEEDVR2_VAE",
+          "type": "SEEDVR2_VAE",
+          "links": [
+            5
+          ]
+        }
+      ],
+      "properties": {
+        "cnr_id": "seedvr2_videoupscaler",
+        "ver": "2.5.24",
+        "Node name for S&R": "SeedVR2LoadVAEModel"
+      },
+      "widgets_values": [
+        "ema_vae_fp16.safetensors",
+        "cuda:0",
+        true,
+        1024,
+        128,
+        true,
+        1024,
+        128,
+        "false",
+        "cpu",
+        false
+      ],
+      "widgets_values_named": {
+        "model": "ema_vae_fp16.safetensors",
+        "device": "cuda:0",
+        "encode_tiled": true,
+        "encode_tile_size": 1024,
+        "encode_tile_overlap": 128,
+        "decode_tiled": true,
+        "decode_tile_size": 1024,
+        "decode_tile_overlap": 128,
+        "tile_debug": "false",
+        "offload_device": "cpu",
+        "cache_model": false
+      }
+    },
+    {
+      "id": 1,
+      "type": "LoadImage",
+      "pos": [
+        789.3333740234375,
+        677.3333740234375
+      ],
+      "size": [
+        282.798828125,
+        314
+      ],
+      "flags": {},
+      "order": 2,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "IMAGE",
+          "type": "IMAGE",
+          "links": [
+            12
+          ]
+        },
+        {
+          "name": "MASK",
+          "type": "MASK",
+          "links": []
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.42.0",
+        "Node name for S&R": "LoadImage"
+      },
+      "widgets_values": [
+        "example.png",
+        "image"
+      ],
+      "widgets_values_named": {
+        "image": "example.png",
+        "upload": "image"
+      }
+    },
+    {
+      "id": 3,
+      "type": "SeedVR2VideoUpscaler",
+      "pos": [
+        1356.66650390625,
+        1236.6666870117188
+      ],
+      "size": [
+        329.956640625,
+        386
+      ],
+      "flags": {},
+      "order": 3,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "image",
+          "type": "IMAGE",
+          "link": 12
+        },
+        {
+          "name": "dit",
+          "type": "SEEDVR2_DIT",
+          "link": 4
+        },
+        {
+          "name": "vae",
+          "type": "SEEDVR2_VAE",
+          "link": 5
+        }
+      ],
+      "outputs": [
+        {
+          "name": "IMAGE",
+          "type": "IMAGE",
+          "links": [
+            11,
+            13
+          ]
+        }
+      ],
+      "properties": {
+        "cnr_id": "seedvr2_videoupscaler",
+        "ver": "2.5.24",
+        "Node name for S&R": "SeedVR2VideoUpscaler"
+      },
+      "widgets_values": [
+        42,
+        "fixed",
+        8944,
+        0,
+        1,
+        false,
+        "lab",
+        0,
+        0,
+        0,
+        0,
+        "cpu",
+        false
+      ],
+      "widgets_values_named": {
+        "seed": 42,
+        "control_after_generate": "fixed",
+        "resolution": 8944,
+        "max_resolution": 0,
+        "batch_size": 1,
+        "uniform_batch_size": false,
+        "color_correction": "lab",
+        "temporal_overlap": 0,
+        "prepend_frames": 0,
+        "input_noise_scale": 0,
+        "latent_noise_scale": 0,
+        "offload_device": "cpu",
+        "enable_debug": false
+      }
+    },
+    {
+      "id": 9,
+      "type": "SaveTIFF16ColourManaged",
+      "pos": [
+        1804.9887840576177,
+        1311.3489286621111
+      ],
+      "size": [
+        330.858984375,
+        106
+      ],
+      "flags": {},
+      "order": 4,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "images",
+          "type": "IMAGE",
+          "link": 11
+        }
+      ],
+      "outputs": [],
+      "properties": {
+        "Node name for S&R": "SaveTIFF16ColourManaged"
+      },
+      "widgets_values": [
+        "AI_94cm_TIFF16",
+        "ProPhoto RGB",
+        300
+      ],
+      "widgets_values_named": {
+        "filename_prefix": "SEEDVR2_ComfyUI_TIFF16",
+        "colour_profile": "ProPhoto RGB",
+        "dpi": 300
+      }
+    },
+    {
+      "id": 10,
+      "type": "SaveImage",
+      "pos": [
+        1804.9887840576177,
+        1461.3489286621111
+      ],
+      "size": [
+        330,
+        270
+      ],
+      "flags": {},
+      "order": 5,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "images",
+          "type": "IMAGE",
+          "link": 13
+        }
+      ],
+      "outputs": [],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.42.0",
+        "Node name for S&R": "SaveImage"
+      },
+      "widgets_values": [
+        "AI_94cm_PNG_backup"
+      ]
+    }
+  ],
+  "links": [
+    [
+      4,
+      4,
+      0,
+      3,
+      1,
+      "SEEDVR2_DIT"
+    ],
+    [
+      5,
+      5,
+      0,
+      3,
+      2,
+      "SEEDVR2_VAE"
+    ],
+    [
+      11,
+      3,
+      0,
+      9,
+      0,
+      "IMAGE"
+    ],
+    [
+      12,
+      1,
+      0,
+      3,
+      0,
+      "IMAGE"
+    ],
+    [
+      13,
+      3,
+      0,
+      10,
+      0,
+      "IMAGE"
+    ]
+  ],
+  "groups": [
+    {
+      "id": 1,
+      "title": "Input: Nano Banana 4K image, 5:4 (4608 x 3712), sRGB",
+      "bounding": [
+        779.3333740234375,
+        538.4,
+        541.8610595703126,
+        462.9333740234375
+      ],
+      "color": "#3f789e",
+      "flags": {}
+    },
+    {
+      "id": 2,
+      "title": "Models",
+      "bounding": [
+        723.3333435058594,
+        1122.4000915527345,
+        359.56302490234384,
+        708.9333129882813
+      ],
+      "color": "#3f789e",
+      "flags": {}
+    },
+    {
+      "id": 3,
+      "title": "Print: 94 x 75.7 cm @300ppi | 110cm paper, 8cm border | sRGB in, ProPhoto out",
+      "bounding": [
+        1303.9998779296875,
+        1161.0666870117188,
+        952.6666259765625,
+        610.2822416503923
+      ],
+      "color": "#3f789e",
+      "flags": {}
+    }
+  ],
+  "config": {},
+  "extra": {
+    "workflowRendererVersion": "LG",
+    "ds": {
+      "scale": 0.7513148009015777,
+      "offset": [
+        -437.10611376953074,
+        -391.3884870117189
+      ]
+    },
+    "frontendVersion": "1.57.1"
+  },
+  "version": 0.4
+}
